@@ -1,0 +1,143 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Käfer Bar Kasse</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      padding: 20px;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .total {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+    input {
+      padding: 6px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    #orderList {
+      margin: 20px auto;
+      font-size: 18px;
+      text-align: left;
+      max-width: 500px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Binkade Käfer Bar – Kasse</h1>
+
+  <div id="buttons"></div>
+
+  <button onclick="removePfand()">♻️ Becher zurück (-2,00 €)</button>
+  <button onclick="reset()">🔁 Zurücksetzen</button>
+
+  <div class="total" id="total">🧮 Summe: 0,00 €</div>
+
+  <h2>🧾 Bestellt:</h2>
+  <div id="orderList"><strong>📝 Noch nichts ausgewählt.</strong></div>
+
+  <h2>💶 Wechselgeldrechner</h2>
+  <label for="given">Gegeben (€): </label>
+  <input type="number" id="given" step="0.01" placeholder="z. B. 20.00">
+  <button onclick="calculateChange()">🧮 Wechselgeld berechnen</button>
+  <div id="change"></div>
+
+  <script>
+    let total = 0;
+    const orderMap = {};
+
+    const items = [
+      { name: "Löschwasser", price: 4.5 },
+      { name: "Cuba Libre", price: 4.5 },
+      { name: "Rüscherl", price: 4.5 },
+      { name: "Jägermeister Red Bull", price: 4.5 },
+      { name: "Vodka Bull / Lemon", price: 4.5 },
+      { name: "Bacardi Cola / Orange", price: 4.5 },
+      { name: "Bacardi Razz", price: 4.5 },
+      { name: "Jack Cola", price: 5.0 },
+      { name: "Alkoholfreier Cocktail", price: 4.0 },
+      { name: "Ficken", price: 2.5 },
+      { name: "Scharfer Hüpfer", price: 2.5 },
+      { name: "Feigling", price: 2.5 },
+      { name: "Jägermeister", price: 2.5 },
+      { name: "Hugo", price: 5.0 },
+      { name: "Aperol Sprizz", price: 5.0 },
+      { name: "Pils", price: 4.0 },
+      { name: "Red Bull", price: 4.0 },
+      { name: "Cola / Sprite", price: 3.0 }
+    ];
+
+    const buttonsDiv = document.getElementById("buttons");
+    const totalDiv = document.getElementById("total");
+
+    items.forEach(item => {
+      const btn = document.createElement("button");
+      btn.textContent = `+ ${item.name} (${item.price.toFixed(2)} €)`;
+      btn.onclick = () => addItem(item.name, item.price);
+      buttonsDiv.appendChild(btn);
+    });
+
+    function addItem(name, amount) {
+      total += amount;
+      orderMap[name] = orderMap[name] ? { count: orderMap[name].count + 1, price: amount } : { count: 1, price: amount };
+      updateTotal();
+      updateOrderList();
+    }
+
+    function removePfand() {
+      total -= 2;
+      addItem("Pfand zurück", -2);
+    }
+
+    function reset() {
+      total = 0;
+      for (const key in orderMap) delete orderMap[key];
+      updateTotal();
+      updateOrderList();
+      document.getElementById("given").value = "";
+      document.getElementById("change").textContent = "";
+    }
+
+    function updateTotal() {
+      totalDiv.textContent = `🧮 Summe: ${total.toFixed(2)} €`;
+    }
+
+    function updateOrderList() {
+      const listDiv = document.getElementById("orderList");
+      if (Object.keys(orderMap).length === 0) {
+        listDiv.innerHTML = "<strong>📝 Noch nichts ausgewählt.</strong>";
+        return;
+      }
+      let html = "<ul>";
+      for (const [name, data] of Object.entries(orderMap)) {
+        html += `<li>${name} × ${data.count} = ${(data.count * data.price).toFixed(2)} €</li>`;
+      }
+      html += "</ul>";
+      listDiv.innerHTML = html;
+    }
+
+    function calculateChange() {
+      const given = parseFloat(document.getElementById("given").value);
+      if (isNaN(given)) {
+        document.getElementById("change").textContent = "Bitte gültigen Betrag eingeben.";
+        return;
+      }
+      const change = given - total;
+      document.getElementById("change").textContent = "Wechselgeld: " + change.toFixed(2) + " €";
+    }
+  </script>
+</body>
+</html>
